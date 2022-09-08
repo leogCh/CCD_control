@@ -20,6 +20,8 @@ def server_program():
             # raise Exception('Test')
             while True:
                 data = input(' -> ')
+                if len(data)==2:
+                    data = '0xFF0x010x000x070x000x'+data
                 conn.send(data.encode())
 
                 recv_cmd = conn.recv(1024).decode()
