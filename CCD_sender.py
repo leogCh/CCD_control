@@ -1,29 +1,37 @@
 import socket
+from time import sleep
 
+def server_program():
+    # get the hostname
+    host = socket.gethostname()
+    port = 7171  # initiate port no above 1024
 
-def client_program():
-    host = socket.gethostname()  # as both code is running on same pc
-    port = 7171  # socket server port number
+    server_socket = socket.socket()  # get instance
+    # look closely. The bind() function takes tuple as argument
+    server_socket.bind((host, port))  # bind host address and port together
 
-    client_socket = socket.socket()  # instantiate
-    client_socket.connect((host, port))  # connect to the server
+    while(True):
+        # configure how many client the server can listen simultaneously
+        print('start listening ...')
+        server_socket.listen(1)
+        conn, address = server_socket.accept()  # accept new connection
+        print("Connection from: " + str(address))
+        try:
+            # raise Exception('Test')
+            while True:
+                data = input(' -> ')
+                conn.send(data.encode())
 
-    message = input(" -> ")  # take input
+                recv_cmd = conn.recv(1024).decode()
+                if len(recv_cmd)==0 or not recv_cmd:
+                    break
 
-    while message.lower().strip() != 'bye':
-        client_socket.send(message.encode())  # send message
-        data = client_socket.recv(1024).decode()  # receive response
-
-        print('Received from server: ' + data)  # show in terminal
-
-        if len(data)==0 or not data:
-            # if recv_cmd is not received break
-            break
-
-        message = input(" -> ")  # again take input
-
-    client_socket.close()  # close the connection
-
+                print("from connected user: " + str(recv_cmd), type(recv_cmd))
+        except Exception as e:
+            print(repr(e))
+        conn.close()  # close the connection
+        print('end connection ...')
+        sleep(5)
 
 if __name__ == '__main__':
-    client_program()
+    server_program()
