@@ -20,13 +20,19 @@ def server_program():
             # raise Exception('Test')
             while True:
                 data = input(' -> ')
+                
                 if len(data)==2:
                     data = '0xFF0x010x000x070x000x'+data
+
                 conn.send(data.encode())
+
+                if data == 'exit':
+                    break
 
                 recv_cmd = conn.recv(1024).decode()
                 if len(recv_cmd)==0 or not recv_cmd:
                     break
+
 
                 print("from connected user: " + str(recv_cmd), type(recv_cmd))
         except Exception as e:
