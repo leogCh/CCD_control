@@ -1,6 +1,11 @@
 import socket
 import serial
 from time import sleep
+from detect_video import detect
+
+model_path = './tflite/mobilenetV2_model.tflite'
+label_path = './tflite/labelmap.txt'
+conf_th = 0.5
 
 CCD_command_list = ['0xFF0x010x000x070x000x01',
                     '0xFF0x010x000x070x000x02',
@@ -78,13 +83,25 @@ def client_program():
                 if len(recv_cmd)==0 or not recv_cmd:
                     break
 
-                if recv_cmd in CCD_command_list:
+                # if recv_cmd in CCD_command_list or recv_cmd[:20]=='0xFF0x010x000x030x00':
+                if len(recv_cmd)==24:
                     CCD_control(recv_cmd)
+
+                if recv_cmd == 'dd1':
+                    detect(model_path, label_path, conf_th, save_result_img=False, keyboard_input=True)
                 
+                if recv_cmd == 'dd2':
+                    detect(model_path, label_path, conf_th, save_result_img=True, keyboard_input=False)
+                
+                if recv_cmd == 'exit':
+                    break
+
                 client_socket.send('done'.encode())  # send message
         except Exception as e:
             print(repr(e))
         client_socket.close()
+        if recv_cmd == 'exit':
+            break
 
 
 if __name__ == '__main__':
