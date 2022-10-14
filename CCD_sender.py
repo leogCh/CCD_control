@@ -24,7 +24,7 @@ def server_program():
                 if len(data)==2:
                     data = '0xFF0x010x000x070x000x'+data
 
-                conn.send(data.encode())
+                conn.sendall(data.encode())
 
                 if data == 'exit':
                     break
@@ -37,8 +37,13 @@ def server_program():
                 print("from connected user: " + str(recv_cmd), type(recv_cmd))
         except Exception as e:
             print(repr(e))
+        conn.shutdown(2)
         conn.close()  # close the connection
         print('end connection ...')
+        
+        if data == 'exit':
+            break
+        
         sleep(5)
 
 if __name__ == '__main__':

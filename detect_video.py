@@ -20,7 +20,7 @@ from imutils.video import VideoStream , FileVideoStream
 import matplotlib.pyplot as plt
 from meter_reader import meter_GorR
 
-def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save_result_img=False, keyboard_input=False):
+def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save_result_img=False, keyboard_input=False, camera_no=0):
     def _detect(frame, img_counter = [0]):
         # copy of original array for cv2... (god & gary bradski knows why...)
         frame = frame.copy()
@@ -137,7 +137,7 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
 
     # open camera
     # cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(camera_no)
     if keyboard_input:
         cv2.namedWindow("test")
 

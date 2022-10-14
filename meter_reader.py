@@ -90,8 +90,8 @@ def meter_GorR(img, draw_flag=False):
         img = np.array(img, dtype='int')
     # img = img[:,:,::-1]
     # default green, red, black value
-    # color_list0 = np.array([[12, 67, 44], [200,   0,  20], [45, 45, 45]])
-    color_list0 = np.array([[ 0, 57, 17], [255, 143,  55], [38, 30, 42]])
+    color_list0 = np.array([[12, 67, 44], [200,   0,  20], [45, 45, 45]])
+    # color_list0 = np.array([[ 0, 57, 17], [255, 143,  55], [38, 30, 42]])
     # update green, red value to fit current image
     color_list = get_rgb(np.reshape(img, (img.shape[0]*img.shape[1], 3)).astype('int64'), color_list0, delta=50)
     
