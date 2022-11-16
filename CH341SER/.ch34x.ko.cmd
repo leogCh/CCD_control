@@ -1,0 +1,1 @@
+cmd_/tflite/5S/CH341SER/ch34x.ko := ld -EL -r  -maarch64linux -T ./scripts/module-common.lds --build-id  -o /tflite/5S/CH341SER/ch34x.ko /tflite/5S/CH341SER/ch34x.o /tflite/5S/CH341SER/ch34x.mod.o ;  true
