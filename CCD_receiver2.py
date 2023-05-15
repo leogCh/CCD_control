@@ -1,6 +1,7 @@
 import socket
 from time import sleep
 from detect_video import detect
+from return_result import return_result
 
 model_path = '/tflite/test_area/CCD_control/tflite/mobilenetV2_model.tflite'
 label_path = '/tflite/test_area/CCD_control/tflite/labelmap.txt'
@@ -33,16 +34,18 @@ def client_program():
 
                 if len(recv_cmd)==0 or not recv_cmd:
                     break
-
-                if recv_cmd == 'dd1':
-                    detect(model_path, label_path, conf_th, camera_no=camera_no,
+                
+                frame = None
+                if recv_cmd[:3] == 'dd1':
+                    r1,r2,r3,frame = detect(model_path, label_path, conf_th, camera_no=camera_no,
                            save_result_img=False, keyboard_input=True)
                 
-                if recv_cmd == 'dd2':
-                    detect(model_path, label_path, conf_th, camera_no=camera_no,
+                if recv_cmd[:3] == 'dd2':
+                    r1,r2,r3,frame = detect(model_path, label_path, conf_th, camera_no=camera_no,
                            save_result_img=True, keyboard_input=False)
+                    return_result(recv_cmd[4:], r1,r2,r3,frame)
                 
-                if recv_cmd == 'exit':
+                if recv_cmd[:4] == 'exit':
                     break
 
                 client_socket.sendall('done'.encode())  # send message

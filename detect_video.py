@@ -20,6 +20,8 @@ from imutils.video import VideoStream , FileVideoStream
 import matplotlib.pyplot as plt
 from meter_reader import meter_GorR
 import datetime
+import io
+import base64
 
 def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save_result_img=False, keyboard_input=False, camera_no=0):
     def _detect(frame, img_counter = [0]):
@@ -43,8 +45,10 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
         # Loop over all detections and draw detection box if confidence is above minimum threshold
         print('scores:', scores)
         detected = False
-        for i in range(len(scores)):
+        score = 0
+        for i in np.argsort(scores)[::-1]:
             if ((scores[i] > min_conf_threshold) and (scores[i] <= 1.0)):
+                score = scores[i]
                 detected = True
                 # Get bounding box coordinates and draw box
                 # Interpreter can return coordinates that are outside of image dimensions, need to force them to be within image using max() and min()
@@ -82,13 +86,14 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
                 label_ymin = max(ymin, labelSize[1] + 10) # Make sure not to draw label too close to top of window
                 cv2.rectangle(frame, (xmin, label_ymin-labelSize[1]-10), (xmin+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
                 cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
+                break
         
         if detected and save_result_img == True:
             img_name = f"./opencv_frame_{img_counter[0]}.png"
             cv2.imwrite(img_name, frame)
             img_counter[0]+=1
         
-        return frame
+        return GorR, score, measurement_val, frame
 
     # Import TensorFlow libraries
     # If tflite_runtime is installed, import interpreter from tflite_runtime, else import from regular tensorflow
@@ -148,6 +153,7 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
 
     #cap.isOpened()
     #cap.running()
+    r1,r2,r3,frame = True,0,0,None
     while(cap.isOpened()):
         # 從攝影機擷取一張影像
         ret, frame = cap.read()
@@ -166,7 +172,7 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
                 break
             elif k%256 == 32:
                 # SPACE pressed
-                frame = _detect(frame)
+                r1,r2,r3,frame = _detect(frame)
                 plt.imshow(frame[:,:,::-1])
                 plt.draw()
                 plt.pause(5)
@@ -176,7 +182,7 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
             cv2.imshow('test', frame)
 
         else:
-            frame = _detect(frame)
+            r1,r2,r3,frame = _detect(frame)
             plt.imshow(frame[:,:,::-1])
             plt.draw()
             plt.pause(5)
@@ -188,6 +194,13 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
 
     # 關閉所有 OpenCV 視窗
     cv2.destroyAllWindows()
+
+    temp_io = io.BytesIO()
+    plt.imsave(temp_io, frame[:,:,::-1], format='png')
+    frame = temp_io.getvalue()
+    frame = base64.urlsafe_b64encode(frame).decode('utf-8')
+
+    return r1,r2,r3,frame
 
 if __name__=='__main__':
     model_path = './tflite/mobilenetV2_model.tflite'

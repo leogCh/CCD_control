@@ -102,7 +102,7 @@ def client_program():
                 if '0xFF' in recv_cmd:
                     while(recv_cmd[:4]!='0xFF'):
                         recv_cmd = recv_cmd[1:]
-                    recv_cmd = recv_cmd[:24]
+                    # recv_cmd = recv_cmd[:24]
 
                 print('Received from server: ' + recv_cmd)  # show in terminal
 
@@ -111,9 +111,9 @@ def client_program():
 
                 # if recv_cmd in CCD_command_list or recv_cmd[:20]=='0xFF0x010x000x030x00':
                 if recv_cmd[:4]=='0xFF':
-                    CCD_control(recv_cmd)
+                    CCD_control(recv_cmd[:24])
                     sleep(5)
-                    recv2_conn.sendall('dd2'.encode())
+                    recv2_conn.sendall(f'dd2 {recv_cmd}'.encode())
                     recv_cmd = recv2_conn.recv(1024).decode()
                     print("from receiver2: " + str(recv_cmd), type(recv_cmd))
                     CCD_control('0xFF0x010x000x070x000x05')
