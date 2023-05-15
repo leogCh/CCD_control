@@ -19,6 +19,7 @@ import importlib.util
 from imutils.video import VideoStream , FileVideoStream
 import matplotlib.pyplot as plt
 from meter_reader import meter_GorR
+import datetime
 
 def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save_result_img=False, keyboard_input=False, camera_no=0):
     def _detect(frame, img_counter = [0]):
@@ -53,20 +54,24 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
                 xmax = int(min(imW,(boxes[i][3] * imW)))
                 
                 img_crop = frame[ymin:ymax,xmin:xmax]
-                cv2.imwrite('./test.png', img_crop)
+                try:
+                    cv2.imwrite(f'./{str(datetime.datetime.now())}.png', img_crop)
+                except:
+                    pass
                 img_crop = img_crop[:,:,::-1]
 
-                # try:
-                print('read meter ...')
-                GorR , measurement_val = meter_GorR(img_crop, draw_flag=keyboard_input)
-                if measurement_val >= 100:
-                    measurement_val = 100.0000
-                elif measurement_val <= 0:
-                    measurement_val = 0.0000
-                GorR = str(GorR)
-                print('read meter done')
-                # except:
-                #     continue
+                try:
+                    print('read meter ...')
+                    GorR , measurement_val = meter_GorR(img_crop, draw_flag=keyboard_input)
+                    if measurement_val >= 100:
+                        measurement_val = 100.0000
+                    elif measurement_val <= 0:
+                        measurement_val = 0.0000
+                    GorR = str(GorR)
+                    print('read meter done')
+                except:
+                    GorR = str(True)
+                    measurement_val = 0.0
 
                 cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (0, 2, 255), 4)
                 # Draw label
@@ -162,6 +167,10 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
             elif k%256 == 32:
                 # SPACE pressed
                 frame = _detect(frame)
+                plt.imshow(frame[:,:,::-1])
+                plt.draw()
+                plt.pause(5)
+                plt.close()
             
             # 顯示圖片
             cv2.imshow('test', frame)
@@ -169,7 +178,9 @@ def detect(PATH_TO_CKPT, PATH_TO_LABELS, min_conf_threshold, use_TPU=False, save
         else:
             frame = _detect(frame)
             plt.imshow(frame[:,:,::-1])
-            plt.show()
+            plt.draw()
+            plt.pause(5)
+            plt.close()
             break
         
     # 釋放攝影機

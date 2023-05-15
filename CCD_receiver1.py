@@ -4,7 +4,7 @@ from time import sleep
 
 
 # c_host = socket.gethostname()
-c_host = "10.137.125.231"
+c_host = "10.137.125.46"
 c_port = 7171  # sender server port number
 
 s_host = socket.gethostname()
@@ -97,6 +97,12 @@ def client_program():
                 if '\n' in recv_cmd:
                     recv_cmd = recv_cmd.split('\n')[1]
 
+                recv_cmd = recv_cmd.replace('X', 'x')
+
+                if '0xFF' in recv_cmd:
+                    while(recv_cmd[:4]!='0xFF'):
+                        recv_cmd = recv_cmd[1:]
+                    recv_cmd = recv_cmd[:24]
 
                 print('Received from server: ' + recv_cmd)  # show in terminal
 
@@ -104,7 +110,7 @@ def client_program():
                     break
 
                 # if recv_cmd in CCD_command_list or recv_cmd[:20]=='0xFF0x010x000x030x00':
-                if len(recv_cmd)==24:
+                if recv_cmd[:4]=='0xFF':
                     CCD_control(recv_cmd)
                     sleep(5)
                     recv2_conn.sendall('dd2'.encode())
